@@ -288,6 +288,7 @@ html(lang='zh-CN')
         border-radius: 6px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
         display: inline-block;
+        transition: opacity 0.25s ease-in-out;
       }
       .code-snippet {
         background: #080c14;
@@ -368,7 +369,7 @@ html(lang='zh-CN')
               button.opt-btn#optHeight330(type='button', onclick='selectHeight(330)') 165 (原狭长)
 
         .row(style='margin-bottom: 16px;')
-          button.btn#generateBtn(type='button', style='flex: 1;', onclick='generateCard()') 生成 / 刷新名片
+          button.btn#generateBtn(type='button', style='flex: 1;', onclick='generateCard(true)') 生成 / 刷新名片
           button.btn.btn-secondary(type='button', onclick='randomSkin()') 🎲 随机背景
 
         .preview-box
@@ -596,7 +597,7 @@ html(lang='zh-CN')
         if (elBb) elBb.innerText = '[img]' + fullUrl + '[/img]';
       }
 
-      function generateCard() {
+      function generateCard(forceRefresh) {
         var uid = document.getElementById('roleIdInput').value.trim();
         var skin = document.getElementById('skinInput').value.trim() || '1';
 
@@ -613,13 +614,26 @@ html(lang='zh-CN')
         if (currentHeight && currentHeight !== 420) {
           query.push('height=' + currentHeight);
         }
+        if (forceRefresh) {
+          query.push('t=' + Date.now());
+        }
         var qs = query.length > 0 ? '?' + query.join('&') : '';
         var fullPath = path + qs;
 
         var img = document.getElementById('resultImg');
         var placeholder = document.getElementById('previewPlaceholder');
 
-        img.src = fullPath + (query.length > 0 ? '&t=' : '?t=') + Date.now();
+        if (img.src && img.src !== fullPath) {
+          img.style.opacity = '0.35';
+        }
+        img.onload = function() {
+          img.style.opacity = '1';
+        };
+        img.onerror = function() {
+          img.style.opacity = '1';
+        };
+
+        img.src = fullPath;
         img.style.display = 'inline-block';
         placeholder.style.display = 'none';
 

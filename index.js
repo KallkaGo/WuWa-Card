@@ -23,8 +23,9 @@ app.use(compression())
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'pug')
 
-const CACHE_0 = 'max-age=0, no-cache, no-store, must-revalidate'
-const CACHE_10800 = 'max-age=10800'
+const CACHE_0 = 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0'
+const CACHE_STATIC = 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=3600'
+const CACHE_DYNAMIC = 'public, max-age=60, s-maxage=120, stale-while-revalidate=60'
 
 function renderErrorSvg(message) {
   const safeMsg = String(message || '获取角色数据失败')
@@ -242,7 +243,7 @@ app.get('/:skin/:uid.png', async (req, res) => {
 
     res.set({
       'content-type': 'image/svg+xml; charset=utf-8',
-      'cache-control': isNaN(Number(skin)) ? CACHE_0 : CACHE_10800,
+      'cache-control': isNaN(Number(skin)) ? CACHE_DYNAMIC : CACHE_STATIC,
     })
     res.send(svgImage)
   } catch (err) {
@@ -271,7 +272,7 @@ app.get('/:uid.png', async (req, res) => {
 
     res.set({
       'content-type': 'image/svg+xml; charset=utf-8',
-      'cache-control': CACHE_10800,
+      'cache-control': CACHE_STATIC,
     })
     res.send(svgImage)
   } catch (err) {
