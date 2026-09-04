@@ -7,7 +7,7 @@
 > 自动同步库街区官方实时数据，支持 Vercel 零维护无状态部署，完美嵌入 GitHub Profile README、个人博客与社区论坛！
 
 <p align="center">
-  <a href="https://vercel.com/new/clone?repository-url=https://github.com/KallkaGo/Genshin-Card">
+  <a href="https://vercel.com/new/clone?repository-url=https://github.com/KallkaGo/WuW-Card&amp;env=KURO_USER_ID,KURO_TOKEN&amp;project-name=wuw-card">
     <img src="https://vercel.com/button" alt="Deploy with Vercel" />
   </a>
 </p>
@@ -99,8 +99,8 @@
 
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/KallkaGo/Genshin-Card.git
-cd Genshin-Card
+git clone https://github.com/KallkaGo/WuW-Card.git
+cd WuW-Card
 
 # 2. 安装依赖
 npm install
