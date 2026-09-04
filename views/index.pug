@@ -1,0 +1,649 @@
+doctype html
+html(lang='zh-CN')
+  head
+    meta(charset='utf-8')
+    title 鸣潮卡片生成工具 · Wuthering Waves Resonator Card
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel='icon', type='image/png', href='/favicon.png')
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/lxgw-wenkai-webfont/1.7.0/style.css')
+    style.
+      :root {
+        --bg-main: #0a0e17;
+        --bg-card: #121826;
+        --bg-input: #1a2234;
+        --border-color: #2a364f;
+        --primary: #00e5ff;
+        --primary-hover: #33ebff;
+        --accent-gold: #fbbf24;
+        --text-main: #f1f5f9;
+        --text-sub: #94a3b8;
+        --danger: #f87171;
+        --success: #34d399;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background-color: var(--bg-main);
+        color: var(--text-main);
+        font-family: 'LXGW WenKai', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.6;
+        padding: 24px 16px 60px;
+      }
+      .container {
+        max-width: 820px;
+        margin: 0 auto;
+      }
+      header {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+      .logo-title {
+        font-size: 30px;
+        font-weight: bold;
+        background: linear-gradient(135deg, #ffffff 30%, var(--primary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 8px;
+        letter-spacing: 1px;
+      }
+      .subtitle {
+        color: var(--text-sub);
+        font-size: 15px;
+      }
+      .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 24px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      }
+      .card-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 10px;
+      }
+      .status-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--bg-input);
+        padding: 14px 18px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .user-badge {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .user-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 2px solid var(--primary);
+        background: #000;
+        object-fit: cover;
+      }
+      .tag {
+        font-size: 12px;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 500;
+      }
+      .tag-success { background: rgba(52, 211, 153, 0.15); color: var(--success); border: 1px solid rgba(52, 211, 153, 0.4); }
+      .tag-warn { background: rgba(248, 113, 113, 0.15); color: var(--danger); border: 1px solid rgba(248, 113, 113, 0.4); }
+      .tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .tab-btn {
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        color: var(--text-sub);
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+      }
+      .tab-btn.active {
+        background: var(--primary);
+        color: #050a12;
+        border-color: var(--primary);
+        font-weight: bold;
+      }
+      .form-group {
+        margin-bottom: 14px;
+      }
+      label {
+        display: block;
+        font-size: 13px;
+        color: var(--text-sub);
+        margin-bottom: 6px;
+      }
+      input[type='text'], input[type='number'], textarea, select {
+        width: 100%;
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        padding: 10px 12px;
+        border-radius: 6px;
+        font-size: 14px;
+        outline: none;
+        transition: border 0.2s;
+        font-family: inherit;
+      }
+      input:focus, textarea:focus, select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.2);
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+      }
+      .btn {
+        background: var(--primary);
+        color: #050a12;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s;
+        white-space: nowrap;
+      }
+      .btn:hover {
+        background: var(--primary-hover);
+        box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+      }
+      .btn-secondary {
+        background: var(--bg-input);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+      }
+      .btn-secondary:hover {
+        background: #222d42;
+        border-color: var(--text-sub);
+        box-shadow: none;
+      }
+      .hint {
+        font-size: 12px;
+        color: var(--text-sub);
+        margin-top: 6px;
+      }
+      .role-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .role-pill {
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        transition: all 0.2s;
+      }
+      .role-pill.selected {
+        border-color: var(--primary);
+        background: rgba(0, 229, 255, 0.1);
+        color: var(--primary);
+        font-weight: bold;
+      }
+      .skin-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+        gap: 6px;
+        margin-bottom: 12px;
+      }
+      .skin-pill {
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        padding: 6px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--text-sub);
+      }
+      .skin-pill:hover {
+        border-color: var(--primary);
+        color: var(--text-main);
+      }
+      .skin-pill.selected {
+        border-color: var(--primary);
+        background: rgba(0, 229, 255, 0.15);
+        color: var(--primary);
+        font-weight: bold;
+      }
+      .opt-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+      }
+      .opt-btn {
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        cursor: pointer;
+        color: var(--text-sub);
+        transition: all 0.2s;
+      }
+      .opt-btn:hover {
+        color: var(--text-main);
+      }
+      .opt-btn.active {
+        border-color: var(--primary);
+        background: rgba(0, 229, 255, 0.15);
+        color: var(--primary);
+        font-weight: bold;
+      }
+      .btn-xs {
+        padding: 4px 10px;
+        font-size: 12px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .host-banner {
+        background: rgba(0, 229, 255, 0.04);
+        border: 1px solid rgba(0, 229, 255, 0.2);
+        border-radius: 8px;
+        padding: 12px 14px;
+        margin-bottom: 16px;
+      }
+      .preview-box {
+        text-align: center;
+        padding: 16px;
+        background: #060910;
+        border-radius: 8px;
+        border: 1px dashed var(--border-color);
+        margin-top: 16px;
+      }
+      #resultImg {
+        max-width: 100%;
+        height: auto;
+        border-radius: 6px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+        display: inline-block;
+      }
+      .code-snippet {
+        background: #080c14;
+        border: 1px solid var(--border-color);
+        padding: 10px 14px;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 13px;
+        color: #38bdf8;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        word-break: break-all;
+      }
+      .copy-btn {
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-sub);
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: pointer;
+        margin-left: 8px;
+      }
+      .copy-btn:hover {
+        color: var(--primary);
+        border-color: var(--primary);
+      }
+      #toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(18, 24, 38, 0.95);
+        color: var(--primary);
+        border: 1px solid var(--primary);
+        padding: 8px 18px;
+        border-radius: 20px;
+        font-size: 14px;
+        display: none;
+        z-index: 999;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+      }
+
+  body
+    .container
+      header
+        .logo-title 鸣潮 · 漂泊者名片生成器
+        .subtitle 自动对接库街区，实时生成包含联觉等级、奇藏箱、波片体力与深塔战绩的动态 SVG 卡片
+
+      // 卡片生成器
+      .card
+        .card-title 卡片定制与生成
+        .form-group
+          label 绑定的鸣潮角色 (点击快速切换)
+          .role-pills#rolePills
+            span(style='color: var(--text-sub); font-size: 13px;') 正在拉取角色数据...
+
+        input#roleIdInput(type='hidden', value='')
+        input#skinInput(type='hidden', value='1')
+
+        .form-group
+          label 选择背景图 (12款高清立绘，点击快速选用)
+          .skin-grid#skinGrid
+            // JS 将填充皮肤按钮
+
+        .row(style='margin-bottom: 12px;')
+          .form-group(style='flex: 1;')
+            label 特效模式
+            .opt-row
+              button.opt-btn.active#optEffectSparkles(type='button', onclick='selectEffect("sparkles")') ✦ 典藏星芒
+              button.opt-btn#optEffectClean(type='button', onclick='selectEffect("clean")') 🚫 纯净原版
+          .form-group(style='flex: 1;')
+            label 卡片比例 (高度)
+            .opt-row
+              button.opt-btn.active#optHeight420(type='button', onclick='selectHeight(420)') 210 (推荐微放)
+              button.opt-btn#optHeight330(type='button', onclick='selectHeight(330)') 165 (原狭长)
+
+        .row(style='margin-bottom: 16px;')
+          button.btn#generateBtn(type='button', style='flex: 1;', onclick='generateCard()') 生成 / 刷新名片
+          button.btn.btn-secondary(type='button', onclick='randomSkin()') 🎲 随机背景
+
+        .preview-box
+          img#resultImg(src='', alt='鸣潮卡片预览', style='display: none;')
+          #previewPlaceholder(style='color: var(--text-sub); font-size: 14px; padding: 30px 0;') 点击“生成名片”查看实时渲染效果
+
+      // 调用代码展示
+      .card
+        .card-title 嵌入与调用方式
+        
+        .row(style='align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;')
+          div(style='font-size: 13px; color: var(--text-sub);')
+            span 格式模式：
+            button.opt-btn.active#btnModeTpl(type='button', style='display: inline-block; margin-left: 6px;', onclick='setCodeViewMode("template")') 规范占位符 {xxx}
+            button.opt-btn#btnModeReal(type='button', style='display: inline-block; margin-left: 6px;', onclick='setCodeViewMode("real")') 当前实际值
+          div
+            button.opt-btn#btnToggleDomain(type='button', onclick='toggleDomainMode()') + 附加 {你的域名} 前缀
+
+        label SVG 地址
+        .code-snippet
+          span#linkRaw /{背景编号}/{UID}.png
+          button.copy-btn(type='button', onclick='copyText("linkRaw")') 复制
+
+        label Img 标签 (HTML)
+        .code-snippet
+          span#linkHtml <img src="/{背景编号}/{UID}.png" alt="wuthering-waves-card" />
+          button.copy-btn(type='button', onclick='copyText("linkHtml")') 复制
+
+        label Markdown 引用
+        .code-snippet
+          span#linkMd ![](/{背景编号}/{UID}.png)
+          button.copy-btn(type='button', onclick='copyText("linkMd")') 复制
+
+        label BBCode 论坛引用
+        .code-snippet
+          span#linkBb [img]/{背景编号}/{UID}.png[/img]
+          button.copy-btn(type='button', onclick='copyText("linkBb")') 复制
+
+        .hint(style='margin-top: 14px; color: var(--text-sub); font-size: 13px; line-height: 1.8; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 6px; border: 1px solid var(--border-color);')
+          p • #[code(style='color: var(--primary);') {背景编号}]：可填 1~12（新皮肤编号）、#[code(style='color: var(--primary);') rand]（随机背景）或 1-5（指定随机范围）
+          p • #[code(style='color: var(--primary);') {UID}]：游戏内的 9 位 UID
+          p • #[code(style='color: var(--primary);') {你的域名}]：若在 GitHub Profile 等外部展示，前面加上部署的域名（如 #[code(style='color: var(--primary);') https://你的项目.vercel.app]）即可
+
+    #toast 提示内容
+
+    script.
+      var currentRoles = [];
+      var countdown = 0;
+      var timer = null;
+
+      function showToast(msg) {
+        var t = document.getElementById('toast');
+        t.innerText = msg;
+        t.style.display = 'block';
+        setTimeout(function() { t.style.display = 'none'; }, 2500);
+      }
+
+      async function checkStatus() {
+        try {
+          var res = await fetch('/kuro/api/status');
+          var data = await res.json();
+          var rolePills = document.getElementById('rolePills');
+
+          if (data.isLoggedIn && data.roles && data.roles.length > 0) {
+            currentRoles = data.roles;
+            if (rolePills) {
+              rolePills.innerHTML = '';
+              currentRoles.forEach(function(role, idx) {
+                var pill = document.createElement('div');
+                pill.className = 'role-pill' + (idx === 0 ? ' selected' : '');
+                pill.innerText = (role.roleName || '角色') + ' (UID: ' + role.roleId + ')';
+                pill.onclick = function() {
+                  document.querySelectorAll('.role-pill').forEach(function(p) { p.classList.remove('selected'); });
+                  pill.classList.add('selected');
+                  document.getElementById('roleIdInput').value = role.roleId;
+                  generateCard();
+                };
+                rolePills.appendChild(pill);
+              });
+            }
+
+            var roleInput = document.getElementById('roleIdInput');
+            if (roleInput && !roleInput.value) {
+              roleInput.value = currentRoles[0].roleId;
+              generateCard();
+            }
+          } else {
+            if (rolePills) {
+              rolePills.innerHTML = '<span style="color: var(--accent-gold); font-size: 13px;">请在 Vercel 环境变量中配置 KURO_USER_ID 与 KURO_TOKEN</span>';
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      var skinMetaList = [
+        { id: '1', name: '露西 01' },
+        { id: '2', name: '露西 03' },
+        { id: '3', name: '露西 05' },
+        { id: '4', name: '爱弥斯 02' },
+        { id: '5', name: '陆·赫斯 01' },
+        { id: '6', name: '陆·赫斯 03' },
+        { id: '7', name: '椿 03' },
+        { id: '8', name: '弗洛洛 05' },
+        { id: '9', name: '仇远 03' },
+        { id: '10', name: '达妮娅 01' },
+        { id: '11', name: '尤诺 02' },
+        { id: '12', name: '今汐 03' }
+      ];
+
+      var currentEffect = 'sparkles';
+      var currentHeight = 420;
+
+      function renderSkinGrid() {
+        var grid = document.getElementById('skinGrid');
+        if (!grid) return;
+        var curSkin = (document.getElementById('skinInput').value || '').trim() || '1';
+        grid.innerHTML = skinMetaList.map(function(s) {
+          var isSelected = (s.id === curSkin);
+          return '<div class="skin-pill' + (isSelected ? ' selected' : '') + '" onclick="selectSkin(\'' + s.id + '\')">' + s.id + '. ' + s.name + '</div>';
+        }).join('');
+      }
+
+      function selectSkin(id) {
+        document.getElementById('skinInput').value = id;
+        renderSkinGrid();
+        generateCard();
+      }
+
+      function selectEffect(eff) {
+        currentEffect = eff;
+        var btnSparkles = document.getElementById('optEffectSparkles');
+        var btnClean = document.getElementById('optEffectClean');
+        if (btnSparkles) btnSparkles.classList.toggle('active', eff === 'sparkles');
+        if (btnClean) btnClean.classList.toggle('active', eff === 'clean');
+        generateCard();
+      }
+
+      function selectHeight(h) {
+        currentHeight = Number(h);
+        var btn420 = document.getElementById('optHeight420');
+        var btn330 = document.getElementById('optHeight330');
+        if (btn420) btn420.classList.toggle('active', currentHeight === 420);
+        if (btn330) btn330.classList.toggle('active', currentHeight === 330);
+        generateCard();
+      }
+
+      var codeViewMode = 'template'; // 'template' or 'real'
+      var withDomain = false;        // true or false
+
+      function setCodeViewMode(mode) {
+        codeViewMode = mode;
+        var btnTpl = document.getElementById('btnModeTpl');
+        var btnReal = document.getElementById('btnModeReal');
+        if (btnTpl) btnTpl.classList.toggle('active', mode === 'template');
+        if (btnReal) btnReal.classList.toggle('active', mode === 'real');
+        updateEmbedCodes();
+      }
+
+      function toggleDomainMode() {
+        withDomain = !withDomain;
+        var btn = document.getElementById('btnToggleDomain');
+        if (btn) {
+          btn.classList.toggle('active', withDomain);
+          btn.innerText = withDomain ? '✓ 已带 {你的域名} 前缀' : '+ 附加 {你的域名} 前缀';
+        }
+        updateEmbedCodes();
+      }
+
+      function randomSkin() {
+        var skinInput = document.getElementById('skinInput');
+        skinInput.value = 'rand';
+        renderSkinGrid();
+        generateCard();
+      }
+
+      function updateEmbedCodes() {
+        var elRaw = document.getElementById('linkRaw');
+        var elMd = document.getElementById('linkMd');
+        var elHtml = document.getElementById('linkHtml');
+        var elBb = document.getElementById('linkBb');
+
+        if (codeViewMode === 'template') {
+          var prefix = withDomain ? 'https://{你的域名}' : '';
+          var raw = prefix + '/{背景编号}/{UID}.png';
+          var md = '![](' + raw + ')';
+          var html = '<img src="' + raw + '" alt="wuthering-waves-card" />';
+          var bb = '[img]' + raw + '[/img]';
+
+          if (elRaw) elRaw.innerText = raw;
+          if (elMd) elMd.innerText = md;
+          if (elHtml) elHtml.innerText = html;
+          if (elBb) elBb.innerText = bb;
+          return;
+        }
+
+        // 实际值模式
+        var uidEl = document.getElementById('roleIdInput');
+        var skinEl = document.getElementById('skinInput');
+        var uid = uidEl ? (uidEl.value.trim() || '{UID}') : '{UID}';
+        var skin = skinEl ? (skinEl.value.trim() || '1') : '1';
+
+        var query = [];
+        if (currentEffect && currentEffect !== 'sparkles') {
+          query.push('effect=' + encodeURIComponent(currentEffect));
+        }
+        if (currentHeight && currentHeight !== 420) {
+          query.push('height=' + currentHeight);
+        }
+        var qs = query.length > 0 ? '?' + query.join('&') : '';
+
+        var domainPart = '';
+        if (withDomain) {
+          domainPart = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? 'https://{你的域名}'
+            : window.location.origin;
+        }
+
+        var fullUrl = domainPart + '/' + skin + '/' + uid + '.png' + qs;
+
+        if (elRaw) elRaw.innerText = fullUrl;
+        if (elMd) elMd.innerText = '![](' + fullUrl + ')';
+        if (elHtml) elHtml.innerText = '<img src="' + fullUrl + '" alt="wuthering-waves-card" />';
+        if (elBb) elBb.innerText = '[img]' + fullUrl + '[/img]';
+      }
+
+      function generateCard() {
+        var uid = document.getElementById('roleIdInput').value.trim();
+        var skin = document.getElementById('skinInput').value.trim() || '1';
+
+        if (!uid) {
+          alert('请输入或选择一个鸣潮角色 UID');
+          return;
+        }
+
+        var path = '/' + skin + '/' + uid + '.png';
+        var query = [];
+        if (currentEffect && currentEffect !== 'sparkles') {
+          query.push('effect=' + encodeURIComponent(currentEffect));
+        }
+        if (currentHeight && currentHeight !== 420) {
+          query.push('height=' + currentHeight);
+        }
+        var qs = query.length > 0 ? '?' + query.join('&') : '';
+        var fullPath = path + qs;
+
+        var img = document.getElementById('resultImg');
+        var placeholder = document.getElementById('previewPlaceholder');
+
+        img.src = fullPath + (query.length > 0 ? '&t=' : '?t=') + Date.now();
+        img.style.display = 'inline-block';
+        placeholder.style.display = 'none';
+
+        updateEmbedCodes();
+      }
+
+      function copyText(elementId) {
+        var el = document.getElementById(elementId);
+        var text = el ? el.innerText : '';
+        if (!text || text === '-') return;
+        navigator.clipboard.writeText(text).then(function() {
+          showToast('已复制到剪贴板！');
+        }).catch(function() {
+          showToast('复制失败，请手动复制');
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('skinInput').addEventListener('input', function() {
+          renderSkinGrid();
+          updateEmbedCodes();
+        });
+
+        renderSkinGrid();
+        updateEmbedCodes();
+        checkStatus();
+      });
