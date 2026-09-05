@@ -25,7 +25,7 @@ app.set('view engine', 'pug')
 
 const CACHE_0 = 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0'
 const CACHE_STATIC = 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=3600'
-const CACHE_DYNAMIC = 'public, max-age=60, s-maxage=120, stale-while-revalidate=60'
+const CACHE_DYNAMIC = 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0'
 
 function renderErrorSvg(message) {
   const safeMsg = String(message || '获取角色数据失败')

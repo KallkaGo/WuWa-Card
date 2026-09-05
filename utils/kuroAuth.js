@@ -170,15 +170,16 @@ async function checkKuroToken({ userId, token } = {}) {
     result = response?.data || {}
   }
 
+  const userData = result.data?.mine || result.data || {}
   return {
     ok: result.code === 200,
     code: result.code,
     msg: result.msg || result.message || '',
     user: result.data
       ? {
-          userId: result.data.userId,
-          userName: result.data.userName,
-          headUrl: result.data.headUrl,
+          userId: userData.userId,
+          userName: userData.userName,
+          headUrl: userData.headUrl,
         }
       : null,
   }
