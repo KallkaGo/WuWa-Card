@@ -243,7 +243,9 @@ app.get('/:skin/:uid.png', async (req, res) => {
 
     res.set({
       'content-type': 'image/svg+xml; charset=utf-8',
-      'cache-control': isNaN(Number(skin)) ? CACHE_DYNAMIC : CACHE_STATIC,
+      'cache-control': data.avatarFallback
+        ? CACHE_0
+        : (isNaN(Number(skin)) ? CACHE_DYNAMIC : CACHE_STATIC),
     })
     res.send(svgImage)
   } catch (err) {
@@ -272,7 +274,7 @@ app.get('/:uid.png', async (req, res) => {
 
     res.set({
       'content-type': 'image/svg+xml; charset=utf-8',
-      'cache-control': CACHE_STATIC,
+      'cache-control': data.avatarFallback ? CACHE_0 : CACHE_STATIC,
     })
     res.send(svgImage)
   } catch (err) {

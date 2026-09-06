@@ -14,6 +14,8 @@ const logger = pino({ level: process.env.LOG_LEVEL || 'info' })
 const roleListCache = new NodeCache({ stdTTL: 60 * 5 }) // 5分钟
 const cardCache = new NodeCache({ stdTTL: 60 * 3 })     // 3分钟
 const avatarCache = new NodeCache({ stdTTL: 60 * 60 * 24 }) // 24小时
+const avatarFailureCache = new NodeCache({ stdTTL: 30 }) // 失败后30秒再重试
+const avatarRequests = new Map()
 
 const zlib = require('zlib')
 
@@ -198,7 +200,14 @@ async function fetchBufferWithRetry(url, maxRetries = 1, timeoutMs = 8000) {
       return res
     } catch (err) {
       if (attempt < maxRetries) {
-        logger.debug('拉取头像重试: url=%s, attempt=%d, err=%s', url, attempt + 1, err.message)
+        logger.debug(
+          '拉取头像重试: url=%s, attempt=%d, code=%s, status=%s, err=%s',
+          url,
+          attempt + 1,
+          err.code || '-',
+          err.response?.status || '-',
+          err.message
+        )
         await new Promise(r => setTimeout(r, 400))
       } else {
         throw err
@@ -207,22 +216,28 @@ async function fetchBufferWithRetry(url, maxRetries = 1, timeoutMs = 8000) {
   }
 }
 
-async function getAvatarDataUri(primaryUrl, secondaryUrl) {
-  const urls = [primaryUrl, secondaryUrl].filter(Boolean)
-  if (!urls.length) return getDefaultAvatar()
-
-  // 优先复用有效 Base64 缓存
-  for (const u of urls) {
-    const cached = avatarCache.get(u)
-    if (cached && typeof cached === 'string' && cached.startsWith('data:image/')) {
-      return cached
-    }
+async function getAvatarDataUri(primaryUrl) {
+  const url = String(primaryUrl || '').trim()
+  if (!url) {
+    return { dataUri: getDefaultAvatar(), isFallback: true }
   }
 
-  // 尝试依次下载并裁剪转换
-  for (const u of urls) {
+  // 优先复用有效 Base64 缓存
+  const cached = avatarCache.get(url)
+  if (cached && typeof cached === 'string' && cached.startsWith('data:image/')) {
+    return { dataUri: cached, isFallback: false }
+  }
+
+  if (avatarFailureCache.has(url)) {
+    return { dataUri: getDefaultAvatar(), isFallback: true }
+  }
+
+  const pendingRequest = avatarRequests.get(url)
+  if (pendingRequest) return pendingRequest
+
+  const request = (async () => {
     try {
-      const res = await fetchBufferWithRetry(u, 1, 8000)
+      const res = await fetchBufferWithRetry(url, 1, 8000)
       let buf = Buffer.from(res.data)
       try {
         buf = cropAvatarPng(buf)
@@ -231,15 +246,28 @@ async function getAvatarDataUri(primaryUrl, secondaryUrl) {
       }
       const contentType = res.headers['content-type'] || 'image/png'
       const dataUri = `data:${contentType};base64,${buf.toString('base64')}`
-      avatarCache.set(u, dataUri)
-      return dataUri
+      avatarCache.set(url, dataUri)
+      avatarFailureCache.del(url)
+      return { dataUri, isFallback: false }
     } catch (e) {
-      logger.warn('下载游戏头像失败 (%s): %s', u, e.message)
+      logger.warn(
+        '下载游戏头像失败: url=%s, code=%s, status=%s, err=%s',
+        url,
+        e.code || '-',
+        e.response?.status || '-',
+        e.message
+      )
+      avatarFailureCache.set(url, true)
+      return { dataUri: getDefaultAvatar(), isFallback: true }
     }
-  }
+  })()
 
-  // 若均下载超时或失败，使用本地官方高清兜底头像，绝不返回未转换的外部 http url（SVG 中外部 http url 会被浏览器拦截）
-  return getDefaultAvatar()
+  avatarRequests.set(url, request)
+  try {
+    return await request
+  } finally {
+    if (avatarRequests.get(url) === request) avatarRequests.delete(url)
+  }
 }
 
 function getBoxCount(baseData, namePattern) {
@@ -303,11 +331,12 @@ async function userInfo({ uid, detail = false } = {}) {
 
   const cachedData = cardCache.get(cacheKey)
   if (cachedData) {
-    if (!cachedData.avatar || !cachedData.avatar.startsWith('data:image/')) {
-      logger.warn('检测到缓存中头像非 Data URI 格式，重新获取头像...')
+    if (cachedData.avatarFallback || !cachedData.avatar || !cachedData.avatar.startsWith('data:image/')) {
+      logger.warn('检测到缓存中头像为兜底或格式无效，重新获取头像...')
       const primaryAvatarUrl = targetRole.headPhotoUrl || ''
-      const secondaryAvatarUrl = targetRole.gameHeadUrl || ''
-      cachedData.avatar = await getAvatarDataUri(primaryAvatarUrl, secondaryAvatarUrl)
+      const avatarResult = await getAvatarDataUri(primaryAvatarUrl)
+      cachedData.avatar = avatarResult.dataUri
+      cachedData.avatarFallback = avatarResult.isFallback
       cardCache.set(cacheKey, cachedData)
     }
     logger.info('从缓存中获取鸣潮卡片数据: roleId=%s', roleId)
@@ -378,15 +407,15 @@ async function userInfo({ uid, detail = false } = {}) {
   const boxPremium = getBoxCount(baseData, '辉光')
 
   const primaryAvatarUrl = targetRole.headPhotoUrl || ''
-  const secondaryAvatarUrl = targetRole.gameHeadUrl || ''
-  const avatar = await getAvatarDataUri(primaryAvatarUrl, secondaryAvatarUrl)
+  const avatarResult = await getAvatarDataUri(primaryAvatarUrl)
 
   const data = {
     uid: roleId,
     roleId,
     nickname,
     roleName: nickname,
-    avatar,
+    avatar: avatarResult.dataUri,
+    avatarFallback: avatarResult.isFallback,
     level,
     world_level: worldLevel,
     server_name: widgetData?.serverName || targetRole.serverName || '鸣潮',
